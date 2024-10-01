@@ -47,20 +47,11 @@ const employeeSchema = new Schema(
         type: "String",
       },
     },
-    
-    forgotPasswordToken: String,
-    forgotPasswordExpiry: Date,
   },
   { timestamps: true }
 );
 
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
-    return next();
-  }
-  this.password = await bcrypt.hash(this.password, 10);
-  return next();
-});
+
 
 
 
