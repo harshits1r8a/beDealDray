@@ -3,6 +3,7 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import { limit } from './constant.js'
 import userRouter from './routes/user.router.js'
+import employeeRouter from './routes/employee.router.js'
 
 import errorMiddleware from './middlewares/error.middleware.js'
 
@@ -27,6 +28,7 @@ app.use(cookieParser())
 
 // ROUTES OF 3 MODULES
 app.use('/api/v1/user', userRouter)
+app.use('/api/v1/empolyee', employeeRouter)
 
 
 

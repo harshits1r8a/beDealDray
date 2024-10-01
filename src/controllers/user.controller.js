@@ -1,13 +1,37 @@
 import emailValidator from "email-validator";
+import axios from "axios";
 
 import AppError from "../utils/error.util.js";
 import User from "../models/user.model.js";
-// import path from "path";
 
 const cookieOptions = {
   maxAge: 24 * 60 * 60 * 1000, //7 days
   httpOnly: true,
   sequre: true,
+};
+
+const verifyEmail = async (email) => {
+  try {
+
+    const response = await axios.get(process.env.ZEROBOUNCE_API_URI, {
+      params: {
+        api_key: process.env.ZEROBOUNCE_API_KEY,
+        email: email,
+      },
+    });
+
+    console.log("status: ",response.data.status);
+    
+    if (response.data.status === "valid") {
+      return true; // Email is valid
+    } else {
+      return false; // Email is invalid or doesn't exist
+    }
+  } catch (error) {
+    return next(
+      new AppError(`Error in  verifyingEmail controller:${error.message}`, 400)
+    );
+  }
 };
 
 const register = async (req, res, next) => {
@@ -21,6 +45,17 @@ const register = async (req, res, next) => {
     const validEmail = emailValidator.validate(email);
     if (!validEmail) {
       return next(new AppError("Please enter valid email!", 400));
+    }
+
+    const isEmailValid = await verifyEmail(email);
+
+    if (!isEmailValid) {
+      return next(
+        new AppError(
+          "Invalid email. Please provide a valid, existing email address."
+        ),
+        400
+      );
     }
 
     const userExist = await User.findOne({ email });
@@ -137,21 +172,18 @@ const getProfile = async (req, res, next) => {
 const changePassword = async (req, res, next) => {
   try {
     const { oldPassword, newPassword } = req.body;
-    
+
     if (!oldPassword || !newPassword) {
       return next(new AppError(`All feilds are required!`, 400));
     }
 
-    const userId  = req.user.id;
-    
+    const userId = req.user.id;
+
     const user = await User.findById(userId).select("+password");
 
     if (!user) {
       return next(
-        new AppError(
-          `Tocken is invalid or expired ! loggin again : `,
-          400
-        )
+        new AppError(`Tocken is invalid or expired ! loggin again : `, 400)
       );
     }
 

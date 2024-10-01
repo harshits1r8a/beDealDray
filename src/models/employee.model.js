@@ -2,7 +2,7 @@ import { model, Schema } from "mongoose";
 
 const employeeSchema = new Schema(
   {
-    Name: {
+    name: {
       type: "String",
       required: [true, "Name is required!"],
       minLength: [5, "Name must be atleast 5 character!"],
@@ -21,9 +21,12 @@ const employeeSchema = new Schema(
       ],
     },
     number: {
-      type: String,
-      required: true,
-      minLength: [10, "Enter valid mobile number!"],
+        type: String,
+        required: true,
+        validate: {
+            validator: (v) => /^\d{10}$/.test(v),
+            message: 'Invalid mobile number'
+        }
     },
     designation: {
         type: "String",
@@ -55,4 +58,4 @@ const employeeSchema = new Schema(
 
 
 
-export default model("User", employeeSchema);
+export default model("Employee", employeeSchema);
